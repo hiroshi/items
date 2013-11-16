@@ -48,6 +48,14 @@
           resolve(values);
         });
       });
+    },
+    updateRecord: function(store, type, record) {
+      return this._datastore.then(function(datastore) {
+        var table = datastore.getTable(type.tableName);
+        var dbRecord = table.get(record.id);
+        dbRecord.set('title', record.get('title'));
+        return Ember.RSVP.resolve();
+      });
     }
   });
   App.ApplicationAdapter = App.DropboxDataStoreAdapter;
@@ -56,10 +64,9 @@
   // });
   App.Item = DS.Model.extend({
     title: DS.attr(),
-    // changed: function() {
-    //   //console.log(this.get('title'))
-    //   this.save();
-    // }.observes('title')
+    autoSave: function() {
+      this.save();
+    }.observes('title')
     // get: function(name) {
     //   console.log(name);
     //   return "hello";
@@ -87,11 +94,11 @@
     model: function(params) {
       return this.get('store').find('item', params.item_id);
     },
-    actions: {
-      // update: function(item) {
-      //   console.log(item);
-      // }
-    }
+    // actions: {
+    //   // update: function(item) {
+    //   //   console.log(item);
+    //   // }
+    // }
   });
   App.IndexRoute = Ember.Route.extend({
     redirect: function() {
