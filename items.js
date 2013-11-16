@@ -2,7 +2,7 @@
   // Dropbox Client
   var client = new Dropbox.Client({key: "qidrlfs46ow3v25"});
   //   Try to finish OAuth authorization.
-  client.authenticate({interactive: true}, function (error) {
+  client.authenticate({interactive: true}, function(error) {
     if (error) {
       alert('Authentication error: ' + error);
     }
@@ -15,10 +15,10 @@
   // Dropbox DataStore API Ember.js Data Adapter
   App.DropboxDataStoreAdapter = DS.Adapter.extend({
     // promise for Dropbox datastore
-    _datastore: new Ember.RSVP.Promise(function (resolve, reject) {
+    _datastore: new Ember.RSVP.Promise(function(resolve, reject) {
       if (client.isAuthenticated()) {
         var datastoreManager = client.getDatastoreManager();
-        datastoreManager.openDefaultDatastore(function (error, datastore) {
+        datastoreManager.openDefaultDatastore(function(error, datastore) {
           if (error) {
             alert('Error opening default datastore: ' + error);
             reject(errot);
@@ -30,7 +30,7 @@
     }),
     find: function(store, type, id) {
       return this._datastore.then(function(datastore) {
-        return new Ember.RSVP.Promise(function (resolve, reject) {
+        return new Ember.RSVP.Promise(function(resolve, reject) {
           var table = datastore.getTable(type.tableName);
           var record = table.get(id);
           var value = $.extend(record.getFields(), {"id": record.getId()});
@@ -40,9 +40,9 @@
     },
     findAll: function(store, type, since) {
       return this._datastore.then(function(datastore) {
-        return new Ember.RSVP.Promise(function (resolve, reject) {
+        return new Ember.RSVP.Promise(function(resolve, reject) {
           var table = datastore.getTable(type.tableName);
-          var values = $.map(table.query(), function (record) {
+          var values = $.map(table.query(), function(record) {
             return $.extend(record.getFields(), {"id": record.getId()});
           });
           resolve(values);
@@ -55,7 +55,15 @@
   //   adapter: App.DropboxDataStoreAdapter.create()
   // });
   App.Item = DS.Model.extend({
-    title: DS.attr()
+    title: DS.attr(),
+    // changed: function() {
+    //   //console.log(this.get('title'))
+    //   this.save();
+    // }.observes('title')
+    // get: function(name) {
+    //   console.log(name);
+    //   return "hello";
+    // }
   })
   App.Item.reopenClass({
     tableName: "items" // FIXME: table name should be converted as plulalization of the model name
@@ -65,8 +73,8 @@
   App.Router.reopen({
     //location: 'history'
   }); 
-  App.Router.map(function () {
-    this.resource('items', { path: '/items' }, function () {
+  App.Router.map(function() {
+    this.resource('items', { path: '/items' }, function() {
       this.resource('item', { path: ':item_id' });
     });
   });
@@ -80,9 +88,9 @@
       return this.get('store').find('item', params.item_id);
     },
     actions: {
-      update: function(item) {
-        console.log(item);
-      }
+      // update: function(item) {
+      //   console.log(item);
+      // }
     }
   });
   App.IndexRoute = Ember.Route.extend({

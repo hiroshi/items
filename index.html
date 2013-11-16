@@ -41,8 +41,8 @@
     <!-- item detials -->
     <script type="text/x-handlebars" data-template-name="item">
       <div class="col-xs-12 col-sm-7" style="background-color: lightblue">
-        title: {{ title }}
-        {{ textarea value=title action="update" }}
+        {{ textarea value=title rows=8 cols=80 }}
+        <!--<button {{action 'save'}}>save</button>-->
       </div>
     </script>
     <script src="https://code.jquery.com/jquery.js"></script>
