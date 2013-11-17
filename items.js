@@ -112,11 +112,19 @@
       this.resource('item', { path: ':item_id' });
     });
   });
+  // Index -> Items
+  App.IndexRoute = Ember.Route.extend({
+    redirect: function() {
+      this.transitionTo('items');
+    }
+  });
+  // Items
   App.ItemsRoute = Ember.Route.extend({
     model: function() {
       return this.get('store').findAll('item');
     }
   });
+  // Item
   App.ItemRoute = Ember.Route.extend({
     model: function(params) {
       return this.get('store').find('item', params.item_id);
@@ -126,10 +134,5 @@
     //   //   console.log(item);
     //   // }
     // }
-  });
-  App.IndexRoute = Ember.Route.extend({
-    redirect: function() {
-      this.transitionTo('items');
-    }
   });
 })();
