@@ -12,24 +12,48 @@
     //LOG_TRANSITIONS: true, 
     //LOG_TRANSITIONS_INTERNAL: true
   });
-  // Dropbox DataStore API Ember.js Data Adapter
-  App.DropboxDataStoreAdapter = DS.Adapter.extend({
-    // promise for Dropbox datastore
-    _datastore: new Ember.RSVP.Promise(function(resolve, reject) {
-      if (client.isAuthenticated()) {
-        var datastoreManager = client.getDatastoreManager();
-        datastoreManager.openDefaultDatastore(function(error, datastore) {
-          if (error) {
-            alert('Error opening default datastore: ' + error);
-            reject(errot);
-          } else {
-            resolve(datastore);
-          }
+  // promise for Dropbox datastore
+  var datastore = new Ember.RSVP.Promise(function(resolve, reject) {
+    if (client.isAuthenticated()) {
+      var datastoreManager = client.getDatastoreManager();
+      datastoreManager.openDefaultDatastore(function(error, datastore) {
+        if (error) {
+          alert('Error opening default datastore: ' + error);
+          reject(errot);
+        } else {
+          observeRmoteChanges(datastore);
+          resolve(datastore);
+        }
+      });
+    }
+  });
+  // observe remote changes
+  // FIXME: work with other tables than 'items'
+  function observeRmoteChanges(datastore) {
+    datastore.recordsChanged.addListener(function(event) {
+      if (!event.isLocal()) {
+        // FIXME: any tables
+        var dbRecords = event.affectedRecordsForTable('items');
+        dbRecords.forEach(function(dbRecord) {
+          App.Item.store.find('item', dbRecord.getId()).then(function(record) {
+            if (record) {
+              if (dbRecord.isDeleted()) {
+                record.deleteRecord();
+              } else {
+                record.set('title', dbRecord.get('title'));
+              }
+            } else {
+              // NOTE: find() just get the job done. nothing to do here?
+            }
+          });
         });
       }
-    }),
+    });
+  }
+  // Dropbox DataStore API Ember.js Data Adapter
+  App.DropboxDataStoreAdapter = DS.Adapter.extend({
     find: function(store, type, id) {
-      return this._datastore.then(function(datastore) {
+      return datastore.then(function(datastore) {
         return new Ember.RSVP.Promise(function(resolve, reject) {
           var table = datastore.getTable(type.tableName);
           var record = table.get(id);
@@ -39,7 +63,7 @@
       });
     },
     findAll: function(store, type, since) {
-      return this._datastore.then(function(datastore) {
+      return datastore.then(function(datastore) {
         return new Ember.RSVP.Promise(function(resolve, reject) {
           var table = datastore.getTable(type.tableName);
           var values = $.map(table.query(), function(record) {
@@ -50,13 +74,16 @@
       });
     },
     updateRecord: function(store, type, record) {
-      return this._datastore.then(function(datastore) {
+      return datastore.then(function(datastore) {
         var table = datastore.getTable(type.tableName);
         var dbRecord = table.get(record.id);
         dbRecord.set('title', record.get('title'));
         return Ember.RSVP.resolve();
       });
-    }
+    },
+    // deleteRecord: function(store, type, record) {
+    //   return Ember.RSVP.resolve();
+    // }
   });
   App.ApplicationAdapter = App.DropboxDataStoreAdapter;
   // App.store = DS.Store.create({
