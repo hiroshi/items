@@ -91,6 +91,7 @@
   // });
   App.Item = DS.Model.extend({
     title: DS.attr(),
+    pos: DS.attr(),
     autoSave: function() {
       this.save();
     }.observes('title')
@@ -122,7 +123,11 @@
   App.ItemsRoute = Ember.Route.extend({
     model: function() {
       return this.get('store').findAll('item');
-    }
+    },
+  });
+  App.ItemsController = Ember.ArrayController.extend({
+    sortProperties: ['pos'],
+    sortAscending: false
   });
   // Item
   App.ItemRoute = Ember.Route.extend({
