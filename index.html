@@ -26,16 +26,14 @@
     <!-- item list -->
     <script type="text/x-handlebars" data-template-name="items">
       <div class="col-xs-12 col-sm-5" style="background-color: lightgray">
-        <ul>
-          <li>
-            <button {{action "createItem"}}>new item</button>
-          </li>
+        <button {{action "createItem"}}>new item</button>
+        <ul class="nav nav-pills nav-stacked">
           {{#each}}
-          <li>
-            {{#link-to "item" this }}
-            {{title}}
+          {{#link-to "item" this tagName="li" href=false}}
+            {{#link-to "item" this}}
+              {{title}}
             {{/link-to}}
-          </li>
+          {{/link-to}}
           {{/each}}
         </ul>
       </div>
