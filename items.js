@@ -56,8 +56,8 @@
       return datastore.then(function(datastore) {
         return new Ember.RSVP.Promise(function(resolve, reject) {
           var table = datastore.getTable(type.tableName);
-          var record = table.get(id);
-          var value = $.extend(record.getFields(), {"id": record.getId()});
+          var dbRecord = table.get(id);
+          var value = $.extend(dbRecord.getFields(), {"id": dbRecord.getId()});
           resolve(value);
         });
       });
@@ -66,11 +66,20 @@
       return datastore.then(function(datastore) {
         return new Ember.RSVP.Promise(function(resolve, reject) {
           var table = datastore.getTable(type.tableName);
-          var values = $.map(table.query(), function(record) {
-            return $.extend(record.getFields(), {"id": record.getId()});
+          var values = $.map(table.query(), function(dbRecord) {
+            return $.extend(dbRecord.getFields(), {"id": dbRecord.getId()});
           });
           resolve(values);
         });
+      });
+    },
+    createRecord: function(store, type, record) {
+      return datastore.then(function(datastore) {
+        var table = datastore.getTable(type.tableName);
+        var value = record.toJSON();
+        var dbRecord = table.insert(value);
+        value.id = dbRecord.getId();
+        return Ember.RSVP.resolve(value);
       });
     },
     updateRecord: function(store, type, record) {
@@ -124,6 +133,20 @@
     model: function() {
       return this.get('store').findAll('item');
     },
+    actions: {
+      createItem: function() {
+        var record = this.get('store').createRecord('item', {
+          title: "new item",
+          pos: Date.now()
+        });
+        this.transitionTo("item", record);
+        //record.save();
+        // this.transitionTo(record);
+        // datastore.then(function(datastore) {
+        //   datastore
+        // });
+      }
+    }
   });
   App.ItemsController = Ember.ArrayController.extend({
     sortProperties: ['pos'],
