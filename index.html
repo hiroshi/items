@@ -30,9 +30,9 @@
         <button class="btn btn-default" {{action "createItem"}}><i class="fa fa-plus"></i> new item</button>
         <ul class="list-group">
           {{#each}}
-            {{#link-to "item" this class="list-group-item"}}
+            {{#link-to "item" this class="list-group-item clearfix"}}
               {{title}}
-              <button {{action "deleteItem" bubbles=false}} class="pull-right btn btn-xs btn-danger"><i class="fa fa-trash-o"></i></button>
+              <button {{action "deleteItem" bubbles=false}} class="pull-right btn btn-sm btn-danger"><i class="fa fa-trash-o"></i></button>
             {{/link-to}}
           {{/each}}
         </ul>
@@ -41,8 +41,8 @@
     </script>
     <!-- item detials -->
     <script type="text/x-handlebars" data-template-name="item">
-      <div class="col-xs-12 col-sm-7" style="background-color: lightblue">
-        {{ textarea value=title rows=8 cols=80 }}
+      <div class="col-xs-12 col-sm-7">
+        {{ textarea value=title class="form-control" rows=20 }}
         <!--<button {{action 'save'}}>save</button>-->
       </div>
     </script>
