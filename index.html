@@ -7,6 +7,7 @@
     <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -25,15 +26,14 @@
     </script>
     <!-- item list -->
     <script type="text/x-handlebars" data-template-name="items">
-      <div class="col-xs-12 col-sm-5" style="background-color: lightgray">
-        <button {{action "createItem"}}>new item</button>
-        <ul class="nav nav-pills nav-stacked">
+      <div class="col-xs-12 col-sm-5">
+        <button class="btn btn-default" {{action "createItem"}}><i class="fa fa-plus"></i> new item</button>
+        <ul class="list-group">
           {{#each}}
-          {{#link-to "item" this tagName="li" href=false}}
-            {{#link-to "item" this}}
+            {{#link-to "item" this class="list-group-item"}}
               {{title}}
+              <button {{action "deleteItem" bubbles=false}} class="pull-right btn btn-xs btn-danger"><i class="fa fa-trash-o"></i></button>
             {{/link-to}}
-          {{/link-to}}
           {{/each}}
         </ul>
       </div>

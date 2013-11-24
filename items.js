@@ -90,9 +90,14 @@
         return Ember.RSVP.resolve();
       });
     },
-    // deleteRecord: function(store, type, record) {
-    //   return Ember.RSVP.resolve();
-    // }
+    deleteRecord: function(store, type, record) {
+      return datastore.then(function(datastore) {
+        var table = datastore.getTable(type.tableName);
+        var dbRecord = table.get(record.id);
+        dbRecord.deleteRecord();
+        return Ember.RSVP.resolve();
+      });
+    }
   });
   App.ApplicationAdapter = App.DropboxDataStoreAdapter;
   // App.store = DS.Store.create({
@@ -157,10 +162,11 @@
     model: function(params) {
       return this.get('store').find('item', params.item_id);
     },
-    // actions: {
-    //   // update: function(item) {
-    //   //   console.log(item);
-    //   // }
-    // }
+    actions: {
+      deleteItem: function(item) {
+        item.deleteRecord();
+        item.save();
+      }
+    }
   });
 })();
