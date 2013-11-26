@@ -164,8 +164,10 @@
     },
     actions: {
       deleteItem: function(item) {
-        item.deleteRecord();
-        item.save();
+        if (confirm("Are you sure?")) {
+          item.deleteRecord();
+          item.save();
+        }
       }
     }
   });

@@ -32,7 +32,7 @@
           {{#each}}
             {{#link-to "item" this class="list-group-item clearfix"}}
               {{title}}
-              <button {{action "deleteItem" bubbles=false}} class="pull-right btn btn-sm btn-danger"><i class="fa fa-trash-o"></i></button>
+              <button {{action "deleteItem" this bubbles=false}} class="pull-right btn btn-sm btn-danger"><i class="fa fa-trash-o"></i></button>
             {{/link-to}}
           {{/each}}
         </ul>
