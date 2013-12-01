@@ -98,11 +98,21 @@
         var table = datastore.getTable(type.tableName);
         var dbRecord = table.get(record.id);
         dbRecord.set('title', record.get('title'));
-        record.get('labels').forEach(function(label) {
+        var currentLabels = record.get('labels');
+        for (key in dbRecord.getFields()) {
+          var match = key.match(/^label_(.*)$/);
+          if (match && !currentLabels.contains(dbRecord.get(key))) {
+            dbRecord.set(key, null);
+          }
+        }
+        // labels remains
+        currentLabels.forEach(function(label) {
           var key = "label_" + btoa(unescape(encodeURIComponent(label)));
           dbRecord.set(key, label);
         });
         return Ember.RSVP.resolve();
+      }).fail(function(error) {
+         console.error(error);
       });
     },
     deleteRecord: function(store, type, record) {
@@ -211,7 +221,14 @@
         var label = this.get("newLabel").trim();
         var item = this.get("model");
         item.get("labels").addObject(label);
+        item.save();
         this.set("newLabel", "");
+      },
+      deleteLabel: function(label) {
+        var item = this.get("model");
+        var labels = item.get("labels");
+        labels.removeObject(label.toString());
+        item.save();
       }
     }
   });

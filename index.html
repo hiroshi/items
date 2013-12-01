@@ -57,7 +57,8 @@
         <div class="well well-sm form-inline">
           <span style="font-size:150%">
           {{#each labels}}
-            <span class="label label-default">{{this}}</span>
+            <span class="label label-default">{{this}}
+              <button {{action 'deleteLabel' this}} class="btn btn-xs btn-danger">x</button></span>
           {{/each}}
           </span>
           <div class="form-group">
