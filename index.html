@@ -14,34 +14,56 @@
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
     <![endif]-->
+    <style type="text/css">
+     .top-margin { margin: 10px; }
+    </style>
   </head>
   <body>
     <!-- base layout -->
     <script type="text/x-handlebars">
       <div class="container">
-      <div class="row">
-        {{ outlet }}
-      </div>
+        <div class="row top-margin">
+          <div class="col-xs-12 col-sm-12">
+            <ul class="nav nav-tabs">
+              <li class="active">
+                <a href="#/items">おつかい</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="row top-margin">
+          {{ outlet }}
+        </div>
       </div>
     </script>
     <!-- item list -->
     <script type="text/x-handlebars" data-template-name="items">
-      <div class="col-xs-12 col-sm-5">
+      <div class="col-xs-12 col-sm-4">
         <button class="btn btn-default" {{action "createItem"}}><i class="fa fa-plus"></i> new item</button>
-        <ul class="list-group">
+        <div class="list-group">
           {{#each}}
             {{#link-to "item" this class="list-group-item clearfix"}}
               {{title}}
-              <button {{action "deleteItem" this bubbles=false}} class="pull-right btn btn-sm btn-danger"><i class="fa fa-trash-o"></i></button>
+              <button {{action "deleteItem" this bubbles=false}} class="pull-right btn btn-xs btn-danger"><i class="fa fa-trash-o"></i></button>
             {{/link-to}}
           {{/each}}
-        </ul>
+        </div>
       </div>
       {{ outlet }}
     </script>
     <!-- item detials -->
     <script type="text/x-handlebars" data-template-name="item">
-      <div class="col-xs-12 col-sm-7">
+      <div class="col-xs-12 col-sm-8">
+        <div class="well well-sm form-inline">
+          <span style="font-size:150%">
+          {{#each labels}}
+            <span class="label label-default">{{this}}</span>
+          {{/each}}
+          </span>
+          <div class="form-group">
+            {{ input class="form-control" placeholder="new label" action="addLabel" value=newLabel }}
+          </div>
+        </div>
         {{ textarea value=title class="form-control" rows=20 }}
         <!--<button {{action 'save'}}>save</button>-->
       </div>

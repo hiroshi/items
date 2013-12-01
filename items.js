@@ -57,7 +57,8 @@
         return new Ember.RSVP.Promise(function(resolve, reject) {
           var table = datastore.getTable(type.tableName);
           var dbRecord = table.get(id);
-          var value = $.extend(dbRecord.getFields(), {"id": dbRecord.getId()});
+          var labels = Ember.A();
+          var value = $.extend(dbRecord.getFields(), {"id": dbRecord.getId(), "labels": labels});
           resolve(value);
         });
       });
@@ -67,7 +68,14 @@
         return new Ember.RSVP.Promise(function(resolve, reject) {
           var table = datastore.getTable(type.tableName);
           var values = $.map(table.query(), function(dbRecord) {
-            return $.extend(dbRecord.getFields(), {"id": dbRecord.getId()});
+            var fields = dbRecord.getFields()
+            var labels = Ember.A();
+            for (var key in fields) {
+              if (key.match(/^label_(.*)$/)) {
+                labels.addObject(fields[key]);
+              }
+            }
+            return $.extend(dbRecord.getFields(), {"id": dbRecord.getId(), "labels": labels});
           });
           resolve(values);
         });
@@ -77,9 +85,12 @@
       return datastore.then(function(datastore) {
         var table = datastore.getTable(type.tableName);
         var value = record.toJSON();
+        delete value['labels']; // FIXME: store labels
         var dbRecord = table.insert(value);
         value.id = dbRecord.getId();
         return Ember.RSVP.resolve(value);
+      }).fail(function(error) {
+         console.error(error);
       });
     },
     updateRecord: function(store, type, record) {
@@ -87,6 +98,10 @@
         var table = datastore.getTable(type.tableName);
         var dbRecord = table.get(record.id);
         dbRecord.set('title', record.get('title'));
+        record.get('labels').forEach(function(label) {
+          var key = "label_" + btoa(unescape(encodeURIComponent(label)));
+          dbRecord.set(key, label);
+        });
         return Ember.RSVP.resolve();
       });
     },
@@ -103,19 +118,38 @@
   // App.store = DS.Store.create({
   //   adapter: App.DropboxDataStoreAdapter.create()
   // });
+  // App.Label = DS.Model.extend({
+  //   name: DS.attr()
+  // })
   App.Item = DS.Model.extend({
     title: DS.attr(),
     pos: DS.attr(),
     autoSave: function() {
       this.save();
-    }.observes('title')
+    }.observes('title'),
+    labels: DS.attr(),
+    // labelsChanged: function() {
+    //   console.log(this.get("labels"));
+    //   this.save();
+    // }.observes("labels.@each")
+
+    // labels: function(key, value) {
+    //   if (arguments.length > 1) {
+    //     this.set("_labels", value);
+    //   }
+    //   return this.get("_labels");
+    // }
+    // labels: function() {
+    //   return ["foo", "bar"];
+    // }.property()
+    //labels: DS.hasMany('label')
     // get: function(name) {
     //   console.log(name);
     //   return "hello";
     // }
   })
   App.Item.reopenClass({
-    tableName: "items" // FIXME: table name should be converted as plulalization of the model name
+    tableName: "items", // FIXME: table name should be converted as plulalization of the model name
   });
 
   // -> router.js
@@ -168,6 +202,16 @@
           item.deleteRecord();
           item.save();
         }
+      }
+    }
+  });
+  App.ItemController = Ember.ObjectController.extend({
+    actions: {
+      addLabel: function() {
+        var label = this.get("newLabel").trim();
+        var item = this.get("model");
+        item.get("labels").addObject(label);
+        this.set("newLabel", "");
       }
     }
   });
