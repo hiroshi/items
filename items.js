@@ -81,13 +81,42 @@
         });
       });
     },
+    findQuery: function(store, type, query, recordArray) {
+      return datastore.then(function(datastore) {
+        return new Ember.RSVP.Promise(function(resolve, reject) {
+        var dbQuery = {};
+        if (query['labels']) {
+          query['labels'].forEach(function(label) {
+            var key = "label_" + btoa(unescape(encodeURIComponent(label)));
+            dbQuery[key] = label;
+          });
+        }
+        //console.log(JSON.stringify(dbQuery));
+        var table = datastore.getTable(type.tableName);
+        var values = $.map(table.query(dbQuery), function(dbRecord) {
+          var fields = dbRecord.getFields()
+          var labels = Ember.A();
+          for (var key in fields) {
+            if (key.match(/^label_(.*)$/)) {
+              labels.addObject(fields[key]);
+            }
+          }
+          return $.extend(dbRecord.getFields(), {"id": dbRecord.getId(), "labels": labels});
+        });
+        //return Ember.RSVP.resolve(values);
+        resolve(values);
+      });
+      });
+    },
     createRecord: function(store, type, record) {
       return datastore.then(function(datastore) {
         var table = datastore.getTable(type.tableName);
         var value = record.toJSON();
         delete value['labels']; // FIXME: store labels
         var dbRecord = table.insert(value);
-        value.id = dbRecord.getId();
+        value = record.toJSON();
+        value['id'] = dbRecord.getId();
+        //record.set('id', dbRecord.getId());
         return Ember.RSVP.resolve(value);
       }).fail(function(error) {
          console.error(error);
@@ -98,7 +127,7 @@
         var table = datastore.getTable(type.tableName);
         var dbRecord = table.get(record.id);
         dbRecord.set('title', record.get('title'));
-        var currentLabels = record.get('labels');
+        var currentLabels = record.get('labels') || Ember.A();
         for (key in dbRecord.getFields()) {
           var match = key.match(/^label_(.*)$/);
           if (match && !currentLabels.contains(dbRecord.get(key))) {
@@ -167,8 +196,8 @@
     //location: 'history'
   }); 
   App.Router.map(function() {
-    this.resource('items', { path: '/items' }, function() {
-      this.resource('item', { path: ':item_id' });
+    this.resource('items', { path: '/items', queryParams: ['labels'] }, function() {
+      this.resource('item', { path: ':item_id', queryParams: ['labels'] });
     });
   });
   // Index -> Items
@@ -179,8 +208,13 @@
   });
   // Items
   App.ItemsRoute = Ember.Route.extend({
-    model: function() {
-      return this.get('store').findAll('item');
+    model: function(params, queryParams) {
+      var labels = queryParams['labels'] ? queryParams['labels'].split(',') : [];
+      return this.get('store').filter('item', {"labels": labels}, function(item) {
+        return labels.every(function(label) {
+          return item.get('labels').contains(label);
+        });
+      });
     },
     actions: {
       createItem: function() {
