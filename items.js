@@ -84,6 +84,11 @@
       this.resource('item', { path: ':item_id', queryParams: ['labels'] });
     });
   });
+  App.ApplicationRoute = Ember.Route.extend({
+    setupController: function(controller, model) {
+      controller.set('labels', Ember.A(["foo", "bar"]));
+    }
+  });
   // Index -> Items
   App.IndexRoute = Ember.Route.extend({
     redirect: function() {

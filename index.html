@@ -25,9 +25,14 @@
         <div class="row top-margin">
           <div class="col-xs-12 col-sm-12">
             <ul class="nav nav-tabs">
-              <li>
-                <a href="#/items">All</a>
-              </li>
+              {{#link-to "items" labels=false tagName="li"}}
+                {{#link-to "items" labels=false}}All{{/link-to}}
+              {{/link-to}}
+              {{#each labels}}
+              {{#link-to "items" labels=this tagName="li"}}
+                {{#link-to "items" labels=this}}{{this}}{{/link-to}}
+              {{/link-to}}
+              {{/each}}
             </ul>
           </div>
         </div>
