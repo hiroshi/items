@@ -7,7 +7,6 @@
         hash  = ((hash << 5) - hash) + str.charCodeAt(i);
         hash |= 0; // Convert to 32bit integer
     }
-    console.log(hash);
     return hash;
   }
   function labelKey(label) {
@@ -50,7 +49,15 @@
       // Keep only current labels
       labels.forEach(function(label) {
         noAttrs[labelKey(label)] = label;
-      });
+        var store = this.get('store');
+        // create new label
+        store.find('label', {name: label}).then(function(exists) {
+          if (exists.get('length') == 0) {
+            var labelRecord = store.createRecord('label', {name: label});
+            labelRecord.save();
+          }
+        });
+      }.bind(this));
       this.save();
     }.observes("labels.@each")
   });
@@ -67,9 +74,13 @@
     }
   });
   // Laebel
-  // App.Label = DropboxDataStoreAdapter.Model.extend({
-  //   name: DS.attr(),
+  App.Label = DropboxDataStoreAdapter.Model.extend({
+    name: DS.attr()
+  });
+  // App.Tag = DS.Model.extend({
+  //   name: DS.attr()
   // });
+
   // App.Label.reopenClass({
   //   tableName: "labels", // FIXME: table name should be converted as plulalization of the model name
   // });
@@ -86,7 +97,14 @@
   });
   App.ApplicationRoute = Ember.Route.extend({
     setupController: function(controller, model) {
-      controller.set('labels', Ember.A(["foo", "bar"]));
+      //controller.set('labels', Ember.A(["foo", "bar"]));
+      controller.set('labels', this.get('store').find('label'));
+    },
+    actions: {
+      deleteLabel: function(label) {
+        label.deleteRecord();
+        label.save();
+      }
     }
   });
   // Index -> Items
@@ -111,12 +129,8 @@
           title: "new item",
           pos: Date.now()
         });
+        record.save();
         this.transitionTo("item", record);
-        //record.save();
-        // this.transitionTo(record);
-        // datastore.then(function(datastore) {
-        //   datastore
-        // });
       }
     }
   });

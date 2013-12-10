@@ -29,8 +29,11 @@
                 {{#link-to "items" labels=false}}All{{/link-to}}
               {{/link-to}}
               {{#each labels}}
-              {{#link-to "items" labels=this tagName="li"}}
-                {{#link-to "items" labels=this}}{{this}}{{/link-to}}
+              {{#link-to "items" labels=name tagName="li"}}
+                {{#link-to "items" labels=name}}
+                  {{name}}
+                  <button {{action "deleteLabel" this bubbles=false}} class="btn btn-xs btn-danger">x</button>
+                {{/link-to}}
               {{/link-to}}
               {{/each}}
             </ul>

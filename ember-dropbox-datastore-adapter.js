@@ -81,6 +81,19 @@ function DropboxDataStoreAdapter(key, App) {
          console.error(error);
       });
     },
+    findAll: function(store, type, since) {
+      return datastore.then(function(datastore) {
+        var dbTableName = Ember.Inflector.inflector.pluralize(type.typeKey);
+        var dbTable = datastore.getTable(dbTableName);
+        var model = App.get(type.typeKey.capitalize());
+        var values = $.map(dbTable.query(), function(dbRecord) {
+          return emberRecord(model, dbRecord);
+        });
+        return Ember.RSVP.resolve(values);
+      }).fail(function(error) {
+         console.error(error);
+      });
+    },
     findQuery: function(store, type, query, recordArray) {
       return datastore.then(function(datastore) {
         var dbTableName = Ember.Inflector.inflector.pluralize(type.typeKey);
