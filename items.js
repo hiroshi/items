@@ -66,8 +66,7 @@
       var outQuery = {};
       if (inQuery['labels']) {
         inQuery['labels'].forEach(function(label) {
-          var key = "label_" + btoa(unescape(encodeURIComponent(label)));
-          outQuery[key] = label;
+          outQuery[labelKey(label)] = label;
         });
       }
       return outQuery;
