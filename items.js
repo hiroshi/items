@@ -24,7 +24,9 @@
     title: DS.attr(),
     pos: DS.attr(),
     autoSave: function() {
-      this.save();
+      if (this.id) {
+        this.save();
+      }
     }.observes("title"),
     // labels
     labels: function() {
