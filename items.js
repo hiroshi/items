@@ -23,6 +23,10 @@
   App.Item = DropboxDataStoreAdapter.Model.extend({
     title: DS.attr(),
     pos: DS.attr(),
+    head: function() {
+      //console.log(this.get('title'));
+      return this.get('title').match(/.*/)[0];
+    }.property('title'),
     autoSave: function() {
       if (this.id) {
         this.save();
