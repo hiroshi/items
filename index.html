@@ -65,19 +65,22 @@
     <!-- item detials -->
     <script type="text/x-handlebars" data-template-name="item">
       <div class="col-xs-12 col-sm-8">
-        <div class="well well-sm form-inline">
+        <div class="well well-sm">
+        <form class="form-inline">
           <span style="font-size:150%">
         {{#with this as item}}
           {{#each labels}}
-            <span class="label label-default">
+            <span class="label label-default clearfix" style="display:inline-block">
               {{#link-to "item" item labels=this }}{{this}}{{/link-to}}
-              <button {{action 'deleteLabel' this}} class="btn btn-xs btn-danger">x</button></span>
+              <button {{action 'deleteLabel' this}} class="btn btn-xs btn-danger" type="button">x</button></span>
           {{/each}}
         {{/with}}
           </span>
           <div class="form-group">
-            {{ input class="form-control" placeholder="new label" action="addLabel" value=newLabel }}
+            {{input class="form-control" placeholder="new label" value=newLabel }}
           </div>
+          <button class="btn btn-default" {{action 'addLabel'}}><i class="fa fa-tag"></i></button>
+        </form>
         </div>
         {{ textarea value=title class="form-control" rows=20 }}
         <!--<button {{action 'save'}}>save</button>-->
