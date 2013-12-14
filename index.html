@@ -51,6 +51,9 @@
         <div class="list-group">
           {{#each}}
             {{#link-to "item" this class="list-group-item clearfix"}}
+              {{#each labels}}
+                <span class="label label-default">{{this}}</span>
+              {{/each}}
               {{head}}
               <button {{action "deleteItem" this bubbles=false}} class="pull-right btn btn-xs btn-danger"><i class="fa fa-trash-o"></i></button>
             {{/link-to}}
