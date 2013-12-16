@@ -7,10 +7,10 @@
       hash  = ((hash << 5) - hash) + str.charCodeAt(i);
       hash |= 0; // Convert to 32bit integer
     }
-    return hash;
+    return hash >>> 0; // http://stackoverflow.com/a/17106974/338986
   }
   function labelKey(label) {
-    return "label_" + Number(hashCode(label)).toString(36);
+    return "label_" + hashCode(label).toString(36);
   }
   // Ember.js Application
   window.App = Ember.Application.create({
