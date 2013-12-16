@@ -132,7 +132,7 @@
       createItem: function() {
         var record = this.get('store').createRecord('item', {
           title: "new item",
-          pos: Date.now()
+          pos: Date.now() / 1000
         });
         record.save();
         this.transitionTo("item", record);
