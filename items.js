@@ -21,7 +21,7 @@
   App.ApplicationAdapter = DropboxDataStoreAdapter("qidrlfs46ow3v25", App);
   // Item
   App.Item = DropboxDataStoreAdapter.Model.extend({
-    text: DS.attr(),
+    text: DS.attr('string', {defaultValue:''}),
     pos: DS.attr(),
     head: function() {
       return this.get('text').match(/.*/)[0];
@@ -31,6 +31,23 @@
         this.save();
       }
     }.observes("text"),
+    _moveToModel: function(typeName) {
+      var store = this.get('store');
+      // TODO: atomic operation
+      var record = store.createRecord(typeName, this.toJSON());
+      record.save();
+      this.deleteRecord();
+      this.save();
+    },
+    archive: function() {
+      this._moveToModel('archive');
+      // var store = this.get('store');
+      // // TODO: atomic operation
+      // var record = store.createRecord('archive', this.toJSON());
+      // record.save();
+      // this.deleteRecord();
+      // this.save();
+    },
     // labels
     labels: function() {
       var labels = Ember.A();
@@ -81,6 +98,19 @@
   App.Label = DropboxDataStoreAdapter.Model.extend({
     name: DS.attr()
   });
+  // Archive
+  App.Archive = App.Item.extend({
+    isArchive: true,
+    unarchive: function() {
+      this._moveToModel('item');
+      // var store = this.get('store');
+      // // TODO: atomic operation
+      // var record = store.createRecord('item', this.toJSON());
+      // record.save();
+      // this.deleteRecord();
+      // this.save();
+    },
+  });
   // App.Tag = DS.Model.extend({
   //   name: DS.attr()
   // });
@@ -95,8 +125,8 @@
     //location: 'history'
   }); 
   App.Router.map(function() {
-    this.resource('items', { path: '/items', queryParams: ['labels'] }, function() {
-      this.resource('item', { path: ':item_id', queryParams: ['labels'] });
+    this.resource('items', { path: '/items', queryParams: ['labels', 'archive'] }, function() {
+      this.resource('item', { path: ':item_id', queryParams: ['labels', 'archive'] });
     });
   });
   App.ApplicationRoute = Ember.Route.extend({
@@ -120,12 +150,17 @@
   // Items
   App.ItemsRoute = Ember.Route.extend({
     model: function(params, queryParams) {
-      var labels = queryParams['labels'] ? queryParams['labels'].split(',') : [];
-      return this.get('store').filter('item', {"labels": labels}, function(item) {
-        return labels.every(function(label) {
-          return item.get('labels').contains(label);
+      var store = this.get('store');
+      if (queryParams['archive']) {
+        return store.findAll('archive');
+      } else {
+        var labels = queryParams['labels'] ? queryParams['labels'].split(',') : [];
+        return store.filter('item', {"labels": labels}, function(item) {
+          return labels.every(function(label) {
+            return item.get('labels').contains(label);
+          });
         });
-      });
+      }
     },
     actions: {
       createItem: function() {
@@ -135,6 +170,18 @@
         });
         record.save();
         this.transitionTo("item", record);
+      },
+      archiveItem: function(item) {
+        item.archive();
+      },
+      unarchiveItem: function(item) {
+        item.unarchive();
+      },
+      deleteItem: function(item) {
+        if (confirm("Are you sure?")) {
+          item.deleteRecord();
+          item.save();
+        }
       }
     }
   });
@@ -148,12 +195,6 @@
       return this.get('store').find('item', params.item_id);
     },
     actions: {
-      deleteItem: function(item) {
-        if (confirm("Are you sure?")) {
-          item.deleteRecord();
-          item.save();
-        }
-      }
     }
   });
   App.ItemController = Ember.ObjectController.extend({

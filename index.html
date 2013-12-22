@@ -25,17 +25,20 @@
         <div class="row top-margin">
           <div class="col-xs-12 col-sm-12">
             <ul class="nav nav-tabs">
-              {{#link-to "items" labels=false tagName="li"}}
-                {{#link-to "items" labels=false}}All{{/link-to}}
+              {{#link-to "items" labels=false archive=false tagName="li"}}
+                {{#link-to "items" labels=false archive=false }}All{{/link-to}}
               {{/link-to}}
-              {{#each labels}}
-              {{#link-to "items" labels=name tagName="li"}}
-                {{#link-to "items" labels=name}}
+            {{#each labels}}
+              {{#link-to "items" labels=name archive=false tagName="li"}}
+                {{#link-to "items" labels=name archive=false }}
                   {{name}}
                   <button {{action "deleteLabel" this bubbles=false}} class="btn btn-xs btn-danger">x</button>
                 {{/link-to}}
               {{/link-to}}
-              {{/each}}
+            {{/each}}
+              {{#link-to "items" labels=false archive=true tagName="li"}}
+                {{#link-to "items" labels=false archive=true}}<i class="fa fa-archive"></i> Archive{{/link-to}}
+              {{/link-to}}
             </ul>
           </div>
         </div>
@@ -53,7 +56,14 @@
             {{#link-to "item" this class="list-group-item clearfix"}}
               <div>
                 {{head}}
-                <button {{action "deleteItem" this bubbles=false}} class="pull-right btn btn-xs btn-danger"><i class="fa fa-trash-o"></i></button>
+              {{#if isArchive }}
+                <div class="pull-right">
+                  <button {{action "unarchiveItem" this bubbles=false}} class="btn btn-xs"><i class="fa fa-undo" title="Unarchive the item"></i></button>
+                  <button {{action "deleteItem" this bubbles=false}} class="btn btn-xs btn-danger"><i class="fa fa-trash-o" title="Delete the item"></i></button>
+                </div>
+              {{else}}
+                <button {{action "archiveItem" this bubbles=false}} class="pull-right btn btn-xs btn-danger"><i class="fa fa-archive" title="Archive the item"></i></button>
+              {{/if}}
               </div>
               <div>
               {{#each labels}}
