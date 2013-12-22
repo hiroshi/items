@@ -21,17 +21,16 @@
   App.ApplicationAdapter = DropboxDataStoreAdapter("qidrlfs46ow3v25", App);
   // Item
   App.Item = DropboxDataStoreAdapter.Model.extend({
-    title: DS.attr(),
+    text: DS.attr(),
     pos: DS.attr(),
     head: function() {
-      //console.log(this.get('title'));
-      return this.get('title').match(/.*/)[0];
-    }.property('title'),
+      return this.get('text').match(/.*/)[0];
+    }.property('text'),
     autoSave: function() {
       if (this.id) {
         this.save();
       }
-    }.observes("title"),
+    }.observes("text"),
     // labels
     labels: function() {
       var labels = Ember.A();
@@ -131,7 +130,7 @@
     actions: {
       createItem: function() {
         var record = this.get('store').createRecord('item', {
-          title: "new item",
+          text: "new item",
           pos: Date.now() / 1000
         });
         record.save();
