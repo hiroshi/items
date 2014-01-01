@@ -54,7 +54,7 @@ function DropboxDataStoreAdapter(key, App) {
       }
     });
   }
-  // convert a dropbox datastore ecord to a ember record
+  // Convert a dropbox datastore record to an ember record
   function emberRecord(model, dbRecord) {
     var attrNames = Ember.get(model, 'attributes').keys.toArray();
     var dbFields = dbRecord.getFields();
@@ -66,6 +66,15 @@ function DropboxDataStoreAdapter(key, App) {
       }
     }
     return $.extend(dbFields, {"id": dbRecord.getId(), "noAttrs": noAttrs});
+  }
+  // Return true if any localFields are changed against remoteFields
+  function fieldsChanged(localFields, remoteFields) {
+    for (var k in localFields) {
+      if (localFields[k] != remoteFields[k]) {
+        return true;
+      }
+    }
+    return false;
   }
   // Dropbox DataStore API Ember.js Data Adapter
   var adapter = DS.Adapter.extend({
@@ -128,9 +137,12 @@ function DropboxDataStoreAdapter(key, App) {
         var dbTable = datastore.getTable(dbTableName);
         var dbRecord = dbTable.get(record.id);
         var emberFields = record.toJSON();
-        dbFields = $.extend(emberFields, emberFields['noAttrs']);
+        var dbFields = $.extend(emberFields, emberFields['noAttrs']);
         delete dbFields['noAttrs'];
-        dbRecord.update(dbFields);
+        // NOTE: Dropbox.Datastore will propagate current values even if no local changes. To prevent echo back of remote chages check if changes are made.
+        if (fieldsChanged(dbFields, dbRecord.getFields())) {
+          dbRecord.update(dbFields);
+        }
         return Ember.RSVP.resolve();
       }).fail(function(error) {
          console.error(error);
