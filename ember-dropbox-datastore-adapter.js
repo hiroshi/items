@@ -10,7 +10,7 @@ function DropboxDataStoreAdapter(key, App) {
       alert('Authentication error: ' + error);
     }
   });
-  // Promise for Dropbox datastore
+  // Promise for Dropbox.Datastore
   var datastore = new Ember.RSVP.Promise(function(resolve, reject) {
     if (client.isAuthenticated()) {
       var datastoreManager = client.getDatastoreManager();
@@ -23,8 +23,21 @@ function DropboxDataStoreAdapter(key, App) {
           resolve(datastore);
         }
       });
+    } else {
+      reject("Dropbox.Client not authenticated.");
     }
   });
+  // Promise for Dropbox.datastore.Table by name
+  function getTable(type) {
+    return new Ember.RSVP.Promise(function(resolve, reject) {
+      datastore.then(function(datastore) {
+        var tableName = Ember.Inflector.inflector.pluralize(type.typeKey);
+        resolve(datastore.getTable(tableName));
+      }).fail(function(error) {
+        reject(error);
+      });
+    });
+  }
   // Observe other end of change in the Dropbox DataStore
   function observeRmoteChanges(datastore) {
     datastore.recordsChanged.addListener(function(event) {
@@ -54,9 +67,13 @@ function DropboxDataStoreAdapter(key, App) {
       }
     });
   }
+  // get Ember.Model by type
+  function emberModel(type) {
+    return App.get(type.typeKey.capitalize());
+  }
   // Convert a dropbox datastore record to an ember record
-  function emberRecord(model, dbRecord) {
-    var attrNames = Ember.get(model, 'attributes').keys.toArray();
+  function emberRecord(type, dbRecord) {
+    var attrNames = Ember.get(emberModel(type), 'attributes').keys.toArray();
     var dbFields = dbRecord.getFields();
     // Not a attribute, so keep it in noAttrs
     var noAttrs = {};
@@ -79,24 +96,18 @@ function DropboxDataStoreAdapter(key, App) {
   // Dropbox DataStore API Ember.js Data Adapter
   var adapter = DS.Adapter.extend({
     find: function(store, type, id) {
-      return datastore.then(function(datastore) {
-        var dbTableName = Ember.Inflector.inflector.pluralize(type.typeKey);
-        var dbTable = datastore.getTable(dbTableName);
+      return getTable(type).then(function(dbTable) {
         var dbRecord = dbTable.get(id);
-        var model = App.get(type.typeKey.capitalize());
-        value = emberRecord(model, dbRecord);
+        var value = emberRecord(type, dbRecord);
         return Ember.RSVP.resolve(value);
       }).fail(function(error) {
          console.error(error);
       });
     },
     findAll: function(store, type, since) {
-      return datastore.then(function(datastore) {
-        var dbTableName = Ember.Inflector.inflector.pluralize(type.typeKey);
-        var dbTable = datastore.getTable(dbTableName);
-        var model = App.get(type.typeKey.capitalize());
+      return getTable(type).then(function(dbTable) {
         var values = $.map(dbTable.query(), function(dbRecord) {
-          return emberRecord(model, dbRecord);
+          return emberRecord(type, dbRecord);
         });
         return Ember.RSVP.resolve(values);
       }).fail(function(error) {
@@ -104,13 +115,11 @@ function DropboxDataStoreAdapter(key, App) {
       });
     },
     findQuery: function(store, type, query, recordArray) {
-      return datastore.then(function(datastore) {
-        var dbTableName = Ember.Inflector.inflector.pluralize(type.typeKey);
-        var dbTable = datastore.getTable(dbTableName);
+      return getTable(type).then(function(dbTable) {
         var model = App.get(type.typeKey.capitalize());
         var dbQuery = typeof(model.dbQuery) == "function" ? model.dbQuery(query) : query;
         var values = $.map(dbTable.query(dbQuery), function(dbRecord) {
-          return emberRecord(model, dbRecord);
+          return emberRecord(type, dbRecord);
         });
         return Ember.RSVP.resolve(values);
       }).fail(function(error) {
@@ -118,9 +127,7 @@ function DropboxDataStoreAdapter(key, App) {
       });
     },
     createRecord: function(store, type, record) {
-      return datastore.then(function(datastore) {
-        var dbTableName = Ember.Inflector.inflector.pluralize(type.typeKey);
-        var dbTable = datastore.getTable(dbTableName);
+      return getTable(type).then(function(dbTable) {
         var value = record.toJSON();
         var dbFields = $.extend(value, value['noAttrs']);
         delete dbFields['noAttrs'];
@@ -132,9 +139,7 @@ function DropboxDataStoreAdapter(key, App) {
       });
     },
     updateRecord: function(store, type, record) {
-      return datastore.then(function(datastore) {
-        var dbTableName = Ember.Inflector.inflector.pluralize(type.typeKey);
-        var dbTable = datastore.getTable(dbTableName);
+      return getTable(type).then(function(dbTable) {
         var dbRecord = dbTable.get(record.id);
         var emberFields = record.toJSON();
         var dbFields = $.extend(emberFields, emberFields['noAttrs']);
@@ -149,9 +154,7 @@ function DropboxDataStoreAdapter(key, App) {
       });
     },
     deleteRecord: function(store, type, record) {
-      return datastore.then(function(datastore) {
-        var dbTableName = Ember.Inflector.inflector.pluralize(type.typeKey);
-        var dbTable = datastore.getTable(dbTableName);
+      return getTable(type).then(function(dbTable) {
         var dbRecord = dbTable.get(record.id);
         dbRecord.deleteRecord();
         return Ember.RSVP.resolve();
