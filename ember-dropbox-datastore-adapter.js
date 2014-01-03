@@ -169,5 +169,5 @@ function DropboxDataStoreAdapter(key, App) {
 // Usage example:
 //   App.YourModel = DropboxDataStoreAdapter.Model.extend({...});
 DropboxDataStoreAdapter.Model = DS.Model.extend({
-  noAttrs: DS.attr(),
+  noAttrs: DS.attr(undefined, {defaultValue:{}}),
 });

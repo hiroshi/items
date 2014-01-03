@@ -69,18 +69,20 @@
         }
       }
       // Keep only current labels
-      labels.forEach(function(label) {
-        noAttrs[labelKey(label)] = label;
-        var store = this.get('store');
-        // create new label
-        store.find('label', {name: label}).then(function(exists) {
-          if (exists.get('length') == 0) {
-            var labelRecord = store.createRecord('label', {name: label});
-            labelRecord.save();
-          }
-        });
-      }.bind(this));
-      this.save();
+      if (labels) {
+        labels.forEach(function(label) {
+          noAttrs[labelKey(label)] = label;
+          var store = this.get('store');
+          // create new label
+          store.find('label', {name: label}).then(function(exists) {
+            if (exists.get('length') == 0) {
+              var labelRecord = store.createRecord('label', {name: label});
+              labelRecord.save();
+            }
+          });
+        }.bind(this));
+      }
+      //this.save();
     }.observes("labels.@each")
   });
   App.Item.reopenClass({
@@ -149,12 +151,17 @@
   });
   // Items
   App.ItemsRoute = Ember.Route.extend({
+    setupController: function(controller, model) {
+      controller.set('model', model);
+      controller.set('labels', this.get('labels'));
+    },
     model: function(params, queryParams) {
       var store = this.get('store');
       if (queryParams['archive']) {
         return store.findAll('archive');
       } else {
         var labels = queryParams['labels'] ? queryParams['labels'].split(',') : [];
+        this.set('labels', labels);
         return store.filter('item', {"labels": labels}, function(item) {
           return labels.every(function(label) {
             return item.get('labels').contains(label);
@@ -163,10 +170,11 @@
       }
     },
     actions: {
-      createItem: function() {
+      createItem: function(labels) {
         var record = this.get('store').createRecord('item', {
           text: "new item",
-          pos: Date.now() / 1000
+          pos: Date.now() / 1000,
+          labels: labels
         });
         record.save();
         this.transitionTo("item", record);
@@ -187,7 +195,7 @@
   });
   App.ItemsController = Ember.ArrayController.extend({
     sortProperties: ['pos'],
-    sortAscending: false
+    sortAscending: false,
   });
   // Item
   App.ItemRoute = Ember.Route.extend({

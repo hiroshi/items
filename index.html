@@ -50,7 +50,7 @@
     <!-- item list -->
     <script type="text/x-handlebars" data-template-name="items">
       <div class="col-xs-12 col-sm-4">
-        <button class="btn btn-default" {{action "createItem"}}><i class="fa fa-plus"></i> new item</button>
+        <button class="btn btn-default" {{action "createItem" labels}}><i class="fa fa-plus"></i> new item</button>
         <div class="list-group">
           {{#each}}
             {{#link-to "item" this class="list-group-item clearfix"}}
