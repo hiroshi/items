@@ -19,7 +19,7 @@ function DropboxDataStoreAdapter(key, App) {
           alert('Error opening default datastore: ' + error);
           reject(error);
         } else {
-          observeRmoteChanges(datastore);
+          observeRemoteChanges(datastore);
           resolve(datastore);
         }
       });
@@ -39,7 +39,7 @@ function DropboxDataStoreAdapter(key, App) {
     });
   }
   // Observe other end of change in the Dropbox DataStore
-  function observeRmoteChanges(datastore) {
+  function observeRemoteChanges(datastore) {
     datastore.recordsChanged.addListener(function(event) {
       if (!event.isLocal()) {
         var dbRecords = event.affectedRecordsByTable();
