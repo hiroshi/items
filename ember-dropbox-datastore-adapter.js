@@ -33,7 +33,7 @@ function DropboxDataStoreAdapter(key, App) {
       datastore.then(function(datastore) {
         var tableName = Ember.Inflector.inflector.pluralize(type.typeKey);
         resolve(datastore.getTable(tableName));
-      }).fail(function(error) {
+      }).catch(function(error) {
         reject(error);
       });
     });
@@ -100,7 +100,7 @@ function DropboxDataStoreAdapter(key, App) {
         var dbRecord = dbTable.get(id);
         var value = emberRecord(type, dbRecord);
         return Ember.RSVP.resolve(value);
-      }).fail(function(error) {
+      }).catch(function(error) {
          console.error(error);
       });
     },
@@ -110,7 +110,7 @@ function DropboxDataStoreAdapter(key, App) {
           return emberRecord(type, dbRecord);
         });
         return Ember.RSVP.resolve(values);
-      }).fail(function(error) {
+      }).catch(function(error) {
          console.error(error);
       });
     },
@@ -122,7 +122,7 @@ function DropboxDataStoreAdapter(key, App) {
           return emberRecord(type, dbRecord);
         });
         return Ember.RSVP.resolve(values);
-      }).fail(function(error) {
+      }).catch(function(error) {
          console.error(error);
       });
     },
@@ -134,7 +134,7 @@ function DropboxDataStoreAdapter(key, App) {
         var dbRecord = dbTable.insert(dbFields);
         value['id'] = dbRecord.getId();
         return Ember.RSVP.resolve(value);
-      }).fail(function(error) {
+      }).catch(function(error) {
          console.error(error);
       });
     },
@@ -149,7 +149,7 @@ function DropboxDataStoreAdapter(key, App) {
           dbRecord.update(dbFields);
         }
         return Ember.RSVP.resolve();
-      }).fail(function(error) {
+      }).catch(function(error) {
          console.error(error);
       });
     },
@@ -158,7 +158,7 @@ function DropboxDataStoreAdapter(key, App) {
         var dbRecord = dbTable.get(record.id);
         dbRecord.deleteRecord();
         return Ember.RSVP.resolve();
-      }).fail(function(error) {
+      }).catch(function(error) {
          console.error(error);
       });
     }

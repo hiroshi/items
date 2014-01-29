@@ -127,8 +127,8 @@
     //location: 'history'
   }); 
   App.Router.map(function() {
-    this.resource('items', { path: '/items', queryParams: ['labels', 'archive'] }, function() {
-      this.resource('item', { path: ':item_id', queryParams: ['labels', 'archive'] });
+    this.resource('items', { path: '/items' }, function() {
+      this.resource('item', { path: ':item_id' });
     });
   });
   App.ApplicationRoute = Ember.Route.extend({
@@ -155,13 +155,13 @@
       controller.set('model', model);
       controller.set('labels', this.get('labels'));
     },
-    model: function(params, queryParams) {
+    model: function(params) {
       var store = this.get('store');
-      if (queryParams['archive']) {
+      if (params['archive']) {
         return store.findAll('archive');
       } else {
-        var labels = queryParams['labels'] ? queryParams['labels'].split(',') : [];
-        this.set('labels', labels);
+        var labels = params['labels'] ? params['labels'].split(',') : [];
+        this.set('labels', params['labels']);
         return store.filter('item', {"labels": labels}, function(item) {
           return labels.every(function(label) {
             return item.get('labels').contains(label);
@@ -170,6 +170,9 @@
       }
     },
     actions: {
+      queryParamsDidChange: function () {
+        this.refresh();
+      },
       createItem: function(labels) {
         var record = this.get('store').createRecord('item', {
           text: "new item",
@@ -194,6 +197,7 @@
     }
   });
   App.ItemsController = Ember.ArrayController.extend({
+    queryParams: ['labels', 'archive'],
     sortProperties: ['pos'],
     sortAscending: false,
   });
@@ -206,6 +210,7 @@
     }
   });
   App.ItemController = Ember.ObjectController.extend({
+    queryParams: ['labels', 'archive'],
     actions: {
       addLabel: function() {
         var label = this.get("newLabel").trim();
